@@ -7,7 +7,7 @@
 
 import os
 from typing import Optional
-import openai
+from openai import OpenAI
 from utils.config import load_config
 from utils.logger import get_logger
 
@@ -16,7 +16,9 @@ logger = get_logger(__name__)
 # Загрузить конфигурацию
 config = load_config()
 whisper_provider = config.get('whisper', {}).get('provider', 'openai')
-openai.api_key = config.get('openai', {}).get('api_key', '')
+
+# Инициализация OpenAI client (новый API)
+client = OpenAI(api_key=config.get('openai', {}).get('api_key', ''))
 
 # Инициализация faster-whisper (если выбран)
 _faster_whisper_model = None
@@ -88,8 +90,8 @@ def _transcribe_with_openai(audio_file_path: str, language: str = "ru") -> str:
     logger.info(f"Распознавание через OpenAI Whisper API: {audio_file_path}")
 
     with open(audio_file_path, "rb") as audio_file:
-        # Вызов Whisper API
-        transcript = openai.Audio.transcribe(
+        # Вызов Whisper API (новый формат)
+        transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file,
             language=language,
@@ -97,10 +99,7 @@ def _transcribe_with_openai(audio_file_path: str, language: str = "ru") -> str:
         )
 
     # Получить текст из ответа
-    if isinstance(transcript, str):
-        text = transcript.strip()
-    else:
-        text = transcript.get("text", "").strip()
+    text = transcript.strip() if isinstance(transcript, str) else str(transcript).strip()
 
     logger.info(f"Распознано (OpenAI): {text}")
     return text
@@ -137,9 +136,11 @@ def transcribe_audio(audio_file_path: str, language: str = "ru") -> str:
         else:
             return _transcribe_with_openai(audio_file_path, language)
 
-    except openai.error.OpenAIError as e:
-        logger.error(f"Ошибка OpenAI Whisper API: {e}", exc_info=True)
-        raise Exception(f"Whisper API error: {str(e)}")
+    except Exception as openai_err:
+        if "openai" in str(type(openai_err).__module__):
+            logger.error(f"Ошибка OpenAI Whisper API: {openai_err}", exc_info=True)
+            raise Exception(f"Whisper API error: {str(openai_err)}")
+        raise
 
     except FileNotFoundError as e:
         logger.error(str(e))
@@ -171,7 +172,7 @@ def transcribe_audio_with_prompt(
 
     try:
         with open(audio_file_path, "rb") as audio_file:
-            transcript = openai.Audio.transcribe(
+            transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=audio_file,
                 language=language,
@@ -179,10 +180,7 @@ def transcribe_audio_with_prompt(
                 response_format="text"
             )
 
-        if isinstance(transcript, str):
-            text = transcript.strip()
-        else:
-            text = transcript.get("text", "").strip()
+        text = transcript.strip() if isinstance(transcript, str) else str(transcript).strip()
 
         logger.info(f"Распознано (с промптом): {text}")
         return text
