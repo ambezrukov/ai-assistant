@@ -1,0 +1,34 @@
+[Unit]
+Description=AI Assistant Telegram Bot
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ai-assistant
+Group=ai-assistant
+WorkingDirectory=/opt/ai-assistant
+Environment="PATH=/opt/ai-assistant/venv/bin"
+ExecStart=/opt/ai-assistant/venv/bin/python -u main.py --bot-only
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/ai-assistant/bot.log
+StandardError=append:/var/log/ai-assistant/bot-error.log
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ai-assistant/logs /opt/ai-assistant/data /opt/ai-assistant/cache
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Resource limits
+LimitNOFILE=65535
+MemoryLimit=1G
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

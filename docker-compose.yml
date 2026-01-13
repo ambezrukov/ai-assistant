@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # AI Assistant (Bot + API)
+  ai-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-assistant
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # REST API
+    volumes:
+      # Конфигурация
+      - ./config.yaml:/app/config.yaml:ro
+      - ./.env:/app/.env:ro
+
+      # Данные (персистентные)
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./credentials:/app/credentials
+
+      # Obsidian vault (если используется filesystem метод)
+      - ${OBSIDIAN_VAULT_PATH:-./obsidian_vault}:/obsidian:rw
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Moscow
+    networks:
+      - ai-assistant-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Nginx (reverse proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: ai-assistant-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/ai_assistant.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # SSL сертификаты
+      - ./data/tts_cache:/var/www/tts_cache:ro  # TTS кэш для статики
+    depends_on:
+      - ai-assistant
+    networks:
+      - ai-assistant-network
+
+  # Ollama (опционально, для локальной LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-assistant-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ai-assistant-network
+    # Если у вас есть GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+networks:
+  ai-assistant-network:
+    driver: bridge
+
+volumes:
+  ollama-data:
+    driver: local

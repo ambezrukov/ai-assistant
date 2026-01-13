@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/*.log
+
+# Data
+data/*.db
+data/tts_cache/*
+
+# Credentials (добавляются через volumes)
+credentials/*.json
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+pytest.ini
+
+# Other
+.DS_Store
+Thumbs.db

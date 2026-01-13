@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"Z:\\Мой диск\\ИИ\\ai-assistant\" /b)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

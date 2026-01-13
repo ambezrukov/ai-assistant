@@ -1,0 +1,81 @@
+telegram:
+  bot_token: "YOUR_BOT_TOKEN"
+  allowed_users: [123456789]  # Замените на ваш Telegram User ID
+
+api:
+  token: "YOUR_API_TOKEN_GENERATE_RANDOM"  # Сгенерируйте случайный токен для авторизации Tasker
+  host: "0.0.0.0"
+  port: 8000
+  base_url: "https://your-server.com"  # Замените на адрес вашего сервера
+
+claude:
+  api_key: "YOUR_CLAUDE_API_KEY"
+  model: "claude-sonnet-4-20250514"  # Основная модель для сложных задач
+  haiku_model: "claude-3-5-haiku-20241022"  # Экономичная модель для простых задач
+  use_dynamic_model: true  # Автоматический выбор модели по сложности запроса
+  max_tokens: 4096
+  temperature: 0.7
+
+# Локальная LLM через Ollama (опционально, для экономии)
+ollama:
+  enabled: false  # Включить гибридный режим
+  url: "http://localhost:11434"  # URL Ollama сервера
+  model: "llama3.2"  # Модель для простых задач
+
+# Распознавание речи
+whisper:
+  provider: "openai"  # "openai" (облачный) или "local" (faster-whisper)
+  model_size: "base"  # Для local: tiny, base, small, medium, large
+  device: "cpu"  # Для local: cpu или cuda
+  compute_type: "int8"  # Для local: int8, float16, float32
+
+openai:
+  api_key: "YOUR_OPENAI_API_KEY"  # Для Whisper API (если provider=openai)
+
+google:
+  calendar:
+    credentials_file: "credentials/google_calendar_credentials.json"
+    token_file: "credentials/google_calendar_token.json"
+    default_calendar_id: "primary"  # Основной календарь
+  tasks:
+    credentials_file: "credentials/google_tasks_credentials.json"
+    token_file: "credentials/google_tasks_token.json"
+    task_list_id: "YOUR_TASK_LIST_ID"  # ID списка задач
+    shopping_list_id: "YOUR_SHOPPING_LIST_ID"  # ID списка покупок
+
+obsidian:
+  method: "filesystem"  # "filesystem" (прямой доступ) или "rest_api" (через плагин)
+  vault_path: "/path/to/obsidian/vault"  # Путь к хранилищу (для filesystem)
+  notes_folder: "Daily Notes"  # Папка для заметок
+
+  # Для REST API метода:
+  rest_api_url: "http://localhost:27123"  # URL Obsidian Local REST API
+  rest_api_key: "YOUR_OBSIDIAN_API_KEY"  # API ключ из плагина
+
+  # Git синхронизация (опционально)
+  git_sync:
+    enabled: false  # Включить Git синхронизацию
+    auto_commit: true  # Автоматический commit после изменений
+    auto_push: false  # Автоматический push (осторожно!)
+
+tts:
+  provider: "gtts"  # gtts или google_cloud
+  cache_dir: "data/tts_cache"
+  cache_days: 7  # Хранить TTS файлы 7 дней
+  language: "ru"  # Язык озвучивания
+
+database:
+  path: "data/assistant.db"
+
+# Система персистентной памяти
+memory:
+  enabled: true  # Включить персистентную память (изучение паттернов пользователя)
+  context_days: 30  # Анализировать последние N дней
+  cleanup_days: 90  # Удалять данные старше N дней
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "logs/assistant.log"
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
