@@ -8,6 +8,8 @@ LABEL description="Personal AI Assistant with Claude, Whisper, and Google integr
 RUN apt-get update && apt-get install -y \
     git \
     ffmpeg \
+    pkg-config \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Создание рабочей директории
